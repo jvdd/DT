@@ -1,0 +1,43 @@
+Ruwweg is de opgave: implementeer een kortste-pad algritme. Er is een
+kleine toevoeging ...
+
+Ik wil van Leuven naar Esposende (dat zijn al Prologvariabelen :-),
+met zo weinig mogelijk kilometers, maar ik wil onderweg ook
+overnachten, want het is te ver om in 1 dag te doen. Het moet wel
+lukken in twee dagen, dus 1 overnaching is genoeg, en als het moet rij
+ik er wel even wat extra kilometers voor. Maar ik wil geen enkele dag
+meer dan 1300 km (dat is DagLimiet later) rijden. Welke weg moet ik
+volgen en waar moet ik overnachten ?
+
+Je krijgt een aantal feiten van de vorm
+
+afstand(leuven,brussel,25).
+afstand(brussel,mons,60).
+...
+afstand(braga,esposende,38).
+
+hotel(bordeaux).
+hotel(sansebastian).
+hotel(dax).
+hotel(vitoria).
+hotel(bilbao).
+...
+
+Schrijf een predicaat besteweg/5
+
+	?- besteweg(<Leuven>,<Esposende>,<DagLimiet>,Traject,Hotel).
+
+<Leuven>,<Esposende>,<DagLimiet> zijn hierin gegeven.
+
+zou (afhankelijk van de feiten) als antwoord kunnen geven
+
+    Traject = [leuven, brussel, mons, bordeaux, bayonne, sansebastian, vitoria, braga, esposende],
+    Hotel = bayonne
+
+(de volgorde in Traject mag ook omgekeerd)
+Daarbij is Traject het kortste traject zodat met 1 overnachting - in
+Hotel - van Leuven naar Esposende kan gereisd worden, zonder de
+DagLimiet te overschrijven.
+
+Misschien zijn er meerdere oplossingen (voor Traject of Hotel of
+beide) - je programma geeft er eentje of allemaal: aan jou de keuze,

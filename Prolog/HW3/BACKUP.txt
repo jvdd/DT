@@ -1,0 +1,343 @@
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    prim(Bogen,TotaalGewicht,StartKnoop,Behandeld).
+
+prim(Bogen,TotaalGewicht,Knoop,Behandeld) :-
+    %TODO LOOP NU IN ORDE MAKEN
+    findall((W,X),(boog(Knoop,X,W);boog(X,Knoop,W)),Buren),
+    sort(Buren,SortedBuren),
+    minBoog(SortedBuren,Behandeld,MinKnoop),
+    UpdatedBehandeld = [MinKnoop|Behandeld],
+    %Bogen = [(Knoop,MinKnoop)|RestPad]
+    Bogen = [(Knoop,MinKnoop)],
+    gewicht(SortedBuren,MinKnoop,Gewicht),
+    TotaalGewicht = Gewicht.
+    %TotaalGewicht is Gewicht + RestGewicht,
+    %prim(RestPad,RestGewicht,MinKnoop,UpdatedBehandeld).
+
+minBoog([(_,Knoop)|Rest],[Behandeld],MinKnoop) :-
+    (
+    \+ member(Knoop,Behandeld) ->
+        MinKnoop = Knoop
+    ;
+        minBoog(Rest,Behandeld,MinKnoop)
+    ).
+
+gewicht([(Gewicht,Knoop)|Rest],Knoop,Gewicht).
+gewicht([_|Rest],Knoop,Gewicht) :-
+    gewicht(Rest,Knoop,Gewicht).
+
+
+
+
+
+
+
+
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    prim(Bogen,TotaalGewicht,StartKnoop,Behandeld).
+
+prim([],0,_,Behandeld) :-
+    telKnopen(AantalKnopen),
+    length(Behandeld, AantalBehandeld),
+    AantalKnopen =:= AantalBehandeld.
+prim(Bogen,TotaalGewicht,Knoop,Behandeld) :-
+    %TODO LOOP NU IN ORDE MAKEN
+    findall((W,X),(boog(Knoop,X,W);boog(X,Knoop,W)),Buren),
+    sort(Buren,SortedBuren),
+    minBoog(SortedBuren,Behandeld,MinKnoop),
+    UpdatedBehandeld = [MinKnoop|Behandeld],
+    Bogen = [(Knoop,MinKnoop)|RestPad],
+    %Bogen = [(Knoop,MinKnoop)],
+    %TotaalGewicht = Gewicht,
+    prim(RestPad,RestGewicht,MinKnoop,UpdatedBehandeld),
+    gewicht(SortedBuren,MinKnoop,Gewicht),
+    TotaalGewicht is Gewicht + RestGewicht.
+
+minBoog([(_,Knoop)|Rest],Behandeld,MinKnoop) :-
+    (
+    \+ member(Knoop,Behandeld) ->
+        MinKnoop = Knoop
+    ;
+        minBoog(Rest,Behandeld,MinKnoop)
+    ).
+
+gewicht([(Gewicht,Knoop)|_],Knoop,Gewicht).
+gewicht([_|Rest],Knoop,Gewicht) :-
+    gewicht(Rest,Knoop,Gewicht).
+
+telKnopen(Aantal) :-
+    findall(W, knoop(W), Lijst),
+    length(Lijst, Aantal).
+
+
+
+
+
+
+
+
+
+
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    telKnopen(AantalKnopen),
+    prim(Bogen,TotaalGewicht,StartKnoop,Behandeld,AantalKnopen).
+
+prim([],0,_,Behandeld,AantalKnopen) :-
+    length(Behandeld, AantalBehandeld),
+    AantalKnopen =:= AantalBehandeld.
+prim(Bogen,TotaalGewicht,Knoop,Behandeld,AantalKnopen) :-
+    %TODO LOOP NU IN ORDE MAKEN
+    findall((W,X),(boog(Knoop,X,W);boog(X,Knoop,W)),Buren),
+    sort(Buren,SortedBuren),
+    minBoog(SortedBuren,Behandeld,MinKnoop),
+    UpdatedBehandeld = [MinKnoop|Behandeld],
+    (boog(Knoop,MinKnoop,_) ->
+        Boog = boog(Knoop,MinKnoop)
+    ;
+        Boog = boog(MinKnoop,Knoop)
+    ),
+    Bogen = [Boog|RestPad],
+    prim(RestPad,RestGewicht,MinKnoop,UpdatedBehandeld,AantalKnopen),
+    gewicht(SortedBuren,MinKnoop,Gewicht),
+    TotaalGewicht is Gewicht + RestGewicht.
+
+minBoog([(_,Knoop)|Rest],Behandeld,MinKnoop) :-
+    (
+    \+ member(Knoop,Behandeld) ->
+        MinKnoop = Knoop
+    ;
+        minBoog(Rest,Behandeld,MinKnoop)
+    ).
+
+gewicht([(Gewicht,Knoop)|_],Knoop,Gewicht).
+gewicht([_|Rest],Knoop,Gewicht) :-
+    gewicht(Rest,Knoop,Gewicht).
+
+telKnopen(Aantal) :-
+    findall(W, knoop(W), Lijst),
+    length(Lijst, Aantal).
+
+
+
+
+
+
+
+
+
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    telKnopen(AantalKnopen),
+    prim(Bogen,TotaalGewicht,StartKnoop,Behandeld,AantalKnopen).
+
+prim([],0,_,Behandeld,AantalKnopen) :-
+    length(Behandeld, AantalBehandeld),
+    AantalKnopen =:= AantalBehandeld.
+prim(Bogen,TotaalGewicht,Knoop,Behandeld,AantalKnopen) :-
+    %TODO LOOP NU IN ORDE MAKEN
+    vindAlleBuren(Behandeld,Buren),
+    sort(Buren,[(Gewicht,X,Y)|_]),
+    (member(X,Behandeld) ->
+        MinKnoop = Y
+    ;
+        MinKnoop = X
+    ),
+    %minBoog(SortedBuren,Behandeld,MinKnoop),
+    UpdatedBehandeld = [MinKnoop|Behandeld],
+    (boog(Knoop,MinKnoop,_) ->
+        Boog = boog(Knoop,MinKnoop)
+    ;
+        Boog = boog(MinKnoop,Knoop)
+    ),
+    Bogen = [Boog|RestPad],
+    prim(RestPad,RestGewicht,MinKnoop,UpdatedBehandeld,AantalKnopen),
+    %gewicht(SortedBuren,MinKnoop,Gewicht),
+    TotaalGewicht is Gewicht + RestGewicht.
+
+vindAlleBuren(Behandeld,Buren):-
+    findall((W,X,Y),((boog(Y,X,W);boog(X,Y,W)),member(Y,Behandeld),\+member(X,Behandeld)),Buren).
+
+/*
+minBoog([(_,X,Y)|Rest],Behandeld,MinKnoop) :-
+    (
+    \+ member(Knoop,Behandeld) ->
+        MinKnoop = Knoop
+    ;
+        minBoog(Rest,Behandeld,MinKnoop)
+    ).
+*/
+
+gewicht([(Gewicht,Knoop)|_],Knoop,Gewicht).
+gewicht([_|Rest],Knoop,Gewicht) :-
+    gewicht(Rest,Knoop,Gewicht).
+
+telKnopen(Aantal) :-
+    findall(W, knoop(W), Lijst),
+    length(Lijst, Aantal).
+
+
+
+
+
+
+
+
+
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    telKnopen(AantalKnopen),
+    prim(Bogen,TotaalGewicht,Behandeld,AantalKnopen).
+
+prim([],0,Behandeld,AantalKnopen) :-
+    length(Behandeld, AantalBehandeld),
+    AantalKnopen =:= AantalBehandeld.
+prim(Bogen,TotaalGewicht,Behandeld,AantalKnopen) :-
+    %TODO LOOP NU IN ORDE MAKEN
+    vindAlleBuren(Behandeld,Buren),
+    sort(Buren,[(Gewicht,X,Y)|_]),
+    (member(X,Behandeld) ->
+        NewMinKnoop = Y
+    ;
+        NewMinKnoop = X
+    ),
+    %minBoog(SortedBuren,Behandeld,MinKnoop),
+    UpdatedBehandeld = [NewMinKnoop|Behandeld],
+    (boog(X,Y,_) ->
+        Boog = boog(X,Y)
+    ;
+        Boog = boog(Y,X)
+    ),
+    Bogen = [Boog|RestPad],
+    prim(RestPad,RestGewicht,UpdatedBehandeld,AantalKnopen),
+    TotaalGewicht is Gewicht + RestGewicht.
+    %gewicht(SortedBuren,MinKnoop,Gewicht),
+
+vindAlleBuren(Behandeld,Buren):-
+    findall((W,X,Y),((boog(Y,X,W);boog(X,Y,W)),member(X,Behandeld),\+member(Y,Behandeld)),Buren).
+
+/*
+minBoog([(_,X,Y)|Rest],Behandeld,MinKnoop) :-
+    (
+    \+ member(Knoop,Behandeld) ->
+        MinKnoop = Knoop
+    ;
+        minBoog(Rest,Behandeld,MinKnoop)
+    ).
+*/
+
+/*
+gewicht([(Gewicht,Knoop)|_],Knoop,Gewicht).
+gewicht([_|Rest],Knoop,Gewicht) :-
+    gewicht(Rest,Knoop,Gewicht).
+*/
+
+telKnopen(Aantal) :-
+    findall(W, knoop(W), Lijst),
+    length(Lijst, Aantal).
+
+
+
+
+
+
+
+
+% PRIM
+% TODO: ZORGEN DAT UNIEKE BOMEN WORDEN TERUG GEGEVEN
+
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    telKnopen(AantalKnopen),
+    prim(Bogen,TotaalGewicht,Behandeld,AantalKnopen).
+
+prim([],0,Behandeld,AantalKnopen) :-
+    length(Behandeld, AantalBehandeld),
+    AantalKnopen =:= AantalBehandeld.
+prim(Bogen,TotaalGewicht,Behandeld,AantalKnopen) :-
+    vindAlleBuren(Behandeld,Buren),
+    sort(Buren,[(Gewicht,X,Y)|_]),
+    (member(X,Behandeld) ->
+        NewMinKnoop = Y
+    ;
+        NewMinKnoop = X
+    ),
+    UpdatedBehandeld = [NewMinKnoop|Behandeld],
+    (boog(X,Y,_) ->
+        Boog = boog(X,Y)
+    ;
+        Boog = boog(Y,X)
+    ),
+    Bogen = [Boog|RestBogen],
+    prim(RestBogen,RestGewicht,UpdatedBehandeld,AantalKnopen),
+    TotaalGewicht is Gewicht + RestGewicht.
+
+vindAlleBuren(Behandeld,Buren):-
+    findall((W,X,Y),((boog(Y,X,W);boog(X,Y,W)),member(X,Behandeld),\+member(Y,Behandeld)),Buren).
+
+telKnopen(Aantal) :-
+    findall(W, knoop(W), Lijst),
+    length(Lijst, Aantal).
+
+
+
+
+
+% NAIEF
+naief(Bogen,TotaalGewicht):-
+    knoop(StartKnoop),
+    Toegevoegd = [StartKnoop],
+    telKnopen(AantalKnopen),
+    genereerOB(Bogen,StartKnoop,Toegevoegd,AantalKnopen),
+    testMOB(Bogen),
+    TotaalGewicht = 44.
+
+genereerOB([],_,Toegevoegd,AantalKnopen) :-
+    length(Toegevoegd, AantalToegevoegd),
+    AantalKnopen =:= AantalToegevoegd.
+genereerOB(Bogen,Knoop,Toegevoegd,AantalKnopen) :-
+    knoop(X),
+    \+member(X,Toegevoegd),
+    (
+    (boog(Knoop,X,_),
+    Bogen = [boog(Knoop,X)|RestBogen])
+    ;
+    (boog(X,Knoop,_),
+    Bogen = [boog(X,Knoop)|RestBogen])
+    ),
+    UpdatedToegevoegd = [X|Toegevoegd],
+    genereerOB(RestBogen,X,UpdatedToegevoegd,AantalKnopen).
+
+% Bogen bevat een OB (kringvrij en n-1 bogen)
+testMOB(Bogen) :-
+    bogenNietInOB(Bogen,AndereBogen),
+    testMOB(Bogen,AndereBogen).
+
+bogenNietInOB(Bogen,AndereBogen) :-
+    findall(boog(X,Y),(boog(X,Y,_),\+member(boog(X,Y),Bogen)),AndereBogen).
+
+testMOB(_,[]).
+testMOB(Bogen,[(X,Y)|RestAndereBogen]) :-
+    gewicht(X,Y,Gewicht),
+    afstand(Bogen,X,Y,Afstand),
+    Gewicht >= Afstand,
+    testMOB(Bogen,RestAndereBogen).
+
+gewicht(X,Y,Gewicht) :-
+    boog(X,Y,Gewicht).
+
+afstand(_,X,X,0).
+afstand(Bogen,X,Y,Afstand) :-
+    member(boog(X,Z),Bogen),
+    boog(X,Z,Gewicht),
+    Afstand is Gewicht + RestAfstand,
+    afstand(Z,Y,RestAfstand).
+

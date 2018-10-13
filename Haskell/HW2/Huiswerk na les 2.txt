@@ -1,0 +1,66 @@
+Op http://en.wikipedia.org/wiki/Degree_%28graph_theory%29
+kan je vinden wat een graadrij van een graaf is: een niet-stijgende
+sequentie van de graden van de knopen van een graaf.
+Zo is [2,1,1] de graadrij van een graaf met 3 knopen waarvan er eentje
+verbonden is met de andere twee, en verder zijn er geen bogen.
+
+Niet elke niet-stijgende sequentie van positieve integers is de
+graadrij van een graaf: er staat een voorbeeld op de wikipedia pagina.
+Bij sommige graadrijen heb ook meer dan een graaf - idem.
+
+Je vindt er ook een beschrijving van een algoritme (dat van Hakimi [en
+Havel]): je gaat dat algoritme implementeren.
+
+Concreet: schrijf een functie isvangraaf die gegeven een
+niet-stijgende lijst van integers TRUE of FALSE teruggeeft al
+naargelang die lijst een graadrij of niet. Dus (bijvoorbeeld):
+
+*Main> isvangraaf [2,1,1]
+True
+*Main> isvangraaf [3,1,1]
+False
+
+
+Je hoeft niet te testen op correcte invoer, ttz de gegeven lijst zal
+enkel niet-negatieve getallen bevatten en niet stijgen.
+
+======================================================================
+
+
+Je kent ongetwijfeld het 8-koninginnenprobleem: zet 8 koninginnen op
+een schaakbord (dat is 8x8 groot) zodat ze mekaar niet bedreigen. Zulk
+een configuratie noemen we een geldige configuratie. Een koningin
+bedreigt elk stuk dat in dezelfde rij, kolom of diagonaal staat. Er
+zijn 92 geldige configuraties (of oplossingen) voor het
+8-koninginnenprobleem. De veralgemening naar willekeurige N (i.p.v. 8)
+ligt voor de hand: het N-koninginnenprobleem. Schrijf een getypeerde
+Haskell functie
+
+      koningin
+
+die als argument een getal heeft (de N, bijvoorbeeld 8) en die een
+lijst teruggeeft van alle geldige configuraties.
+Hoe je een configuratie voorstelt mag je zelf kiezen; hier zijn twee
+voorbeelden van voorstellingen van configuraties (niet noodzakelijk
+geldige):
+
+        [(1,3), (2,4)]
+
+        [3, 4]
+
+Beide configuraties stellen voor:
+
+      een koningin op rij 1 en kolom 3 en een koningin op rij 2 en kolom 4
+
+Hoe groter N, hoe meer oplossingen er zijn natuurlijk, dus is het
+voldoende als een oproep zoals
+
+          take 10 (koningin 12)
+
+de 10 eerste oplossingen produceert - de volgorde is niet van belang.
+
+Het gebruik van "list comprehensions" kan je helpen, niet om een
+algoritme te bedenken, maar wel om een kort Haskell programma te
+schrijven. Je hebt informeel al kennis gemaakt met "list
+comprehensions", maar je kan de eerste (8) slides van Haskell2.ppt
+eens bekijken voor iets meer info.

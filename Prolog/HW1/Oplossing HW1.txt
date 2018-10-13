@@ -1,0 +1,52 @@
+isin_boom(node(Links,Rechts,W),Waarde) :-
+	 (
+	   Waarde = W
+	 ;
+	   isin_boom(Links,Waarde)
+	 ;
+	   isin_boom(Rechts,Waarde)
+	 ).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+isin_boom(leeg,_,0).
+isin_boom(node(Links,Rechts,W),Waarde,Aantal) :-
+	isin_boom(Links,Waarde,AantalLinks),
+	isin_boom(Rechts,Waarde,AantalRechts),
+	(W = Waarde ->
+	    Aantal is AantalLinks + AantalRechts + 1
+	;
+	    Aantal is AantalLinks + AantalRechts
+	).
+
+% of met accumulerende parameter:
+
+isin_boom1(Boom,Waarde,Aantal) :- isin_boom1(Boom,Waarde,0,Aantal).
+
+isin_boom1(leeg,_,Acc,Acc).
+isin_boom1(node(Links,Rechts,W),Waarde,Reeds,Totaal) :-
+	isin_boom1(Links,Waarde,Reeds,Reeds1),
+	isin_boom1(Rechts,Waarde,Reeds1,Reeds2),
+	(W = Waarde ->
+	    Totaal is Reeds2 +1
+	;
+	    Totaal = Reeds2
+	).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+gen_boom(N,Boom) :- gen_boom(1,N,Boom).
+
+gen_boom(A,B,Boom) :-
+	(A > B ->
+	    Boom = leeg
+	;
+	    Mid is (A+B)//2,
+	    MidMin is Mid - 1,
+	    MidPlus is Mid + 1,
+	    Boom = node(Links,Rechts,Mid),
+	    gen_boom(A,MidMin,Links),
+	    gen_boom(MidPlus,B,Rechts)
+	).

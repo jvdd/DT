@@ -1,0 +1,53 @@
+OPDRACHT 1
+
+maak_boom([],leeg).
+maak_boom([A|B],node(L,R,A)) :-
+	mid_split(B,LB,RB),
+	maak_boom(LB,L),
+	maak_boom(RB,R).
+
+mid_split(List,A,B) :-
+	mid_split(List,List,A,B), !.
+	mid_split(B,[],[],B).
+mid_split(W,[_],[],W).
+mid_split([A|B],[_,_|Rest],[A|Ra],R) :-
+	mid_split(B,Rest,Ra,R).
+
+
+
+OPDRACHT 2
+
+verzamel_waarden(leeg,[]).
+verzamel_waarden(node(L,R,W),T) :-
+    verzamel_waarden(L,LT),
+    verzamel_waarden(R,RT),
+    append(LT,[W|RT],T).
+
+
+
+OPDRACHT 3
+
+merge_sort([],[]).
+merge_sort([W],[W]).
+merge_sort([A,B|Rest],Sorted) :-
+    split([A,B|Rest],L,R),
+    merge_sort(L,S1),
+    merge_sort(R,S2),
+    merge(S1,S2,Sorted).
+
+split([],[],[]).
+split([A,B|Rest],[A|RestA],[B|RestB]) :-
+    split(Rest,RestA,RestB).
+split([W],[W],[]).
+
+merge(W,[],W).
+merge([],W,W).
+merge([A|RestA],[B|RestB],[X|M]) :-
+    (A =< B ->
+    merge(RestA,[B|RestB],M),
+    X = A
+    ;
+    A > B ->
+    merge([A|RestA],RestB,M),
+    X = B
+    ).

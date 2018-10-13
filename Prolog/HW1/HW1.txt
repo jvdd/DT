@@ -1,0 +1,80 @@
+VRAAG 1:
+isin_boom(node(_,_,W),W).
+isin_boom(node(L,R,_),W) :-
+	isin_boom(L,W);
+	isin_boom(R,W).
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7),X).
+X = 7 ;
+X = 7 ;
+X = 8 ;
+false.
+
+
+VRAAG 2:
+isin_boom(leeg,_,0).
+isin_boom(node(leeg,leeg,W),W,1).
+isin_boom(node(leeg,leeg,W),V,0) :- dif(W, V).
+isin_boom(node(L,R,W),Val,Aantal) :-
+	dif(L, leeg),
+	dif(R, leeg),
+	isin_boom(node(leeg,leeg,W),Val,AantalW),
+	isin_boom(L,Val,AantalL),
+	isin_boom(R,Val,AantalR),
+	Aantal is AantalW + AantalL + AantalR.
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), 8, Aantal).
+Aantal = 1
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), 12, Aantal).
+Aantal = 0
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), X, Aantal).
+X = 7,
+Aantal = 2 ;
+X = 8,
+Aantal = 1 ;
+Aantal = 0,
+dif(X, 8),
+dif(X, 7),
+dif(X, 7) ;
+false.
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), X, 1).
+X = 8;
+false.
+
+Uitleg:	Voor de eerste 2 queries wordt het aantal knopen met de gegeven waarde teruggegeven.
+	De derde query geeft alle waarden die in de boom voorkomen met het bijhorend aantal knopen terug. Daarna wordt ook het aantal 0 terug gegeven 
+	omdat er geen andere waarden in de boom te vinden zijn die nog niet gebruikt zijn (wat ook weergeven wordt door de dif(..) te printen).
+	De vierde query zoekt knopen met een bepaalde waarde waarvan er enkel maar 1 in de boom zijn, in dit geval is dit enkel de knoop met waarde 8.	
+
+
+VRAAG 3:
+verwijder_node(leeg,_,leeg).
+verwijder_node(node(leeg,leeg,W),W,leeg).
+verwijder_node(node(L,R,W),W,Boom):-
+	(
+	dif(L, leeg);
+	dif(R, leeg)
+	),
+	verwijder_node(R,W,Boom).
+verwijder_node(node(L,R,W),Val,Boom) :-
+	dif(W,Val),
+	verwijder_node(L,Val,X),
+	verwijder_node(R,Val,Y),
+	Boom = node(X,Y,W).
+
+
+VRAAG 4:
+gen_boom(0,_).
+gen_boom(X,Boom) :-
+	NewX is X -1,
+	recursgen_boom(NewX,node(leeg,leeg,X),Boom).
+
+recursgen_boom(0,RecursBoom, RecursBoom).	
+recursgen_boom(X,RecursBoom,Boom) :-
+	NewX is X -1,
+	recursgen_boom(NewX,node(leeg,RecursBoom,X), Boom).
+
+Dit is geen gebalanceerde boom.

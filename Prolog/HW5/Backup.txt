@@ -1,0 +1,464 @@
+:- use_module(library(clpfd)).
+
+color(red).
+color(blue).
+color(green).
+
+vertex(a).
+vertex(b).
+vertex(c).
+vertex(d).
+vertex(e).
+
+knoop(a,[1,3,5]).
+knoop(b,[2,4,6]).
+
+boog(a, b).
+
+
+vind_kleuring(ColorList) :-
+    findall((X, Y), boog(X, Y), AlleBogen),
+    findall(X, knoop(X,_), AlleKnopen),
+    vind_alle_kleuren(AlleKleuren),
+    findall(hasColor(X, _), member(X, AlleKnopen), ColorList),
+    createConstraint(AlleBogen,ColorList),
+    colorNodes(ColorList).
+
+vind_alle_kleuren(AlleKleuren) :-
+    findall(X, knoop(_,X), AlleKleurenLijst),
+    concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+    append(SubList, Acc, NewAcc),
+    concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+createConstraint([], _).
+createConstraint([(Knoop1,Knoop2)|RL], ColorList):-
+  member(hasColor(Knoop1, Kleur1), ColorList),
+  member(hasColor(Knoop2, Kleur2), ColorList),
+  dif(Kleur1, Kleur2),
+  knoop(Knoop1, Kleuren1),
+  member(Kleur1, Kleuren1),
+  knoop(Knoop2, Kleuren2),
+  member(Kleur2, Kleuren2),
+  createConstraint(RL, ColorList).
+
+colorNodes([]).
+colorNodes([hasColor(_,C)|Nodes]) :-
+  %color(C),
+  colorNodes(Nodes).
+
+/*
+:- use_module(library(clpfd)).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    findall((X,Y), boog(X,Y), AlleBogen),
+
+    vind_alle_kleuren(AlleKleuren),
+    vind_kleuring(AlleKnopen, AlleKleuren, KleurLijst).
+
+vind_kleuring(AlleKnopen, AlleKleuren, KleurLijst) :-
+    Vars = AlleKnopen,
+    Vars in AlleKleuren,
+    all_different(Vars),
+    checkValid(Vars, AlleKleuren),
+    KleurLijst = Vars.
+
+    vind_alle_kleuren(AlleKleuren) :-
+        findall(X, knoop(_,X), AlleKleurenLijst),
+        concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+    concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+    concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+        append(SubList, Acc, NewAcc),
+        concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+checkValid([], _) :- !.
+checkValid([Var|Rest], Kleuren) :-
+    select(Var, Kleuren, NieuweKleuren),
+    checkValid(Rest, NieuweKleuren).
+
+%   maplist(getKleur, AlleKnopen, KleurPerKnoop)
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:- use_module(library(clpfd)).
+
+knoop(a,[1,3,5]).
+knoop(b,[2,4,6]).
+knoop(c,[1,2]).
+knoop(d,[1,3]).
+
+boog(a, b).
+boog(a, c).
+boog(b, c).
+boog(c, d).
+boog(d, a).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    vind_alle_kleuren(AlleKleuren),
+    findall(kleur(X, _), member(X, AlleKnopen), KleurLijst), % Initialiseer kleurlijst met alle knopen
+    checkValid(AlleKnopen, KleurLijst),
+    initKleuren(KleurLijst),
+    vind_kleuring(AlleKnopen, KleurLijst).
+
+vind_kleuring([], _).
+vind_kleuring([Knoop|Rest], KleurLijst) :-
+    vind_alle_buren(Knoop, AlleBuren),
+    kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    all_different(Kleuren).
+
+vind_alle_kleuren(AlleKleuren) :-
+    findall(X, knoop(_,X), AlleKleurenLijst),
+    concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+    append(SubList, Acc, NewAcc),
+    concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+checkValid([], _):- !.
+checkValid([Knoop|Rest], KleurLijst) :- !,
+    member(kleur(Knoop, _), KleurLijst),
+    %vind_alle_buren(Knoop, AlleBuren),
+    %kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    %all_different(Kleuren),
+    checkValid(Rest, KleurLijst).
+
+vind_alle_buren(Knoop, AlleBuren) :-
+    findall(X, boog(X, Knoop), Buren1),
+    findall(Y, boog(Knoop, Y), Buren2),
+    append(Buren1, Buren2, AlleBurenUnsorted), %
+    sort(AlleBurenUnsorted, AlleBuren). % Om er zo dubbele waarden uit te halen
+
+kleuren_bij_knopen(Knopen, KleurLijst, Kleuren) :-
+    findall(X, (member(Knoop, AlleBuren), !, member(kleur(Knoop, X), KleurLijst)), Kleuren).
+
+initKleuren([]).
+initKleuren([kleur(Knoop, Kleur)|Knopen]) :-
+    knoop(Knoop, Kleuren),
+    member(Kleur, Kleuren), % Controleren of de kleur behoort tot de kleurlijst van de knoop
+    initKleuren(Knopen).
+
+/*
+:- use_module(library(clpfd)).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    findall((X,Y), boog(X,Y), AlleBogen),
+
+    vind_alle_kleuren(AlleKleuren),
+    vind_kleuring(AlleKnopen, AlleKleuren, KleurLijst).
+
+vind_kleuring(AlleKnopen, AlleKleuren, KleurLijst) :-
+    Vars = AlleKnopen,
+    Vars in AlleKleuren,
+    all_different(Vars),
+    checkValid(Vars, AlleKleuren),
+    KleurLijst = Vars.
+
+    vind_alle_kleuren(AlleKleuren) :-
+        findall(X, knoop(_,X), AlleKleurenLijst),
+        concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+    concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+    concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+        append(SubList, Acc, NewAcc),
+        concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+checkValid([], _) :- !.
+checkValid([Var|Rest], Kleuren) :-
+    select(Var, Kleuren, NieuweKleuren),
+    checkValid(Rest, NieuweKleuren).
+
+%   maplist(getKleur, AlleKnopen, KleurPerKnoop)
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:- use_module(library(clpfd)).
+
+knoop(a,[1,3,5]).
+knoop(b,[2,4,6]).
+knoop(c,[1,2]).
+%knoop(d,[1,3]).
+
+boog(a, b).
+%boog(a, c).
+boog(b, c).
+%boog(c, d).
+%boog(d, a).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    vind_alle_kleuren(AlleKleuren),
+    findall(kleur(X, _), member(X, AlleKnopen), KleurLijst), % Initialiseer kleurlijst met alle knopen
+    %checkValid(AlleKnopen, KleurLijst),
+    initKleuren(KleurLijst), % Initialisatie van de kleuren
+    check_kleuring(AlleKnopen, KleurLijst).
+
+check_kleuring([], _).
+check_kleuring([Knoop|Rest], KleurLijst) :-
+    vind_alle_buren(Knoop, AlleBuren),
+    kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    all_different(Kleuren),
+    check_kleuring(Rest, KleurLijst).
+
+vind_alle_kleuren(AlleKleuren) :-
+    findall(X, knoop(_,X), AlleKleurenLijst),
+    concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+    append(SubList, Acc, NewAcc),
+    concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+/*
+checkValid([], _):- !.
+checkValid([Knoop|Rest], KleurLijst) :- !,
+    %member(kleur(Knoop, _), KleurLijst),
+    %vind_alle_buren(Knoop, AlleBuren),
+    %kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    %all_different(Kleuren),
+    checkValid(Rest, KleurLijst).
+*/
+
+vind_alle_buren(Knoop, AlleBuren) :-
+    findall(X, boog(X, Knoop), Buren1),
+    findall(Y, boog(Knoop, Y), Buren2),
+    append(Buren1, Buren2, AlleBurenUnsorted), %
+    sort(AlleBurenUnsorted, AlleBuren). % Om er zo dubbele waarden uit te halen
+
+kleuren_bij_knopen(Knopen, KleurLijst, Kleuren) :-
+    findall(X, (member(Knoop, Knopen), !, member(kleur(Knoop, X), KleurLijst)), Kleuren).
+
+initKleuren([]).
+initKleuren([kleur(Knoop, Kleur)|Knopen]) :-
+    knoop(Knoop, Kleuren),
+    member(Kleur, Kleuren), % Controleren of de kleur behoort tot de kleurlijst van de knoop
+    initKleuren(Knopen).
+
+
+/*
+:- use_module(library(clpfd)).
+
+knoop(a,[1,3,5]).
+knoop(b,[2,4,6]).
+knoop(c,[1,2]).
+%knoop(d,[1,3]).
+
+boog(a, b).
+%boog(a, c).
+boog(b, c).
+%boog(c, d).
+%boog(d, a).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    vind_alle_kleuren(AlleKleuren),
+    findall(kleur(X, _), member(X, AlleKnopen), KleurLijst), % Initialiseer kleurlijst met alle knopen
+    %checkValid(AlleKnopen, KleurLijst),
+    initKleuren(KleurLijst), % Initialisatie van de kleuren
+    check_kleuring(AlleKnopen, KleurLijst).
+
+check_kleuring([], _).
+check_kleuring([Knoop|Rest], KleurLijst) :-
+    vind_alle_buren(Knoop, AlleBuren),
+    kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    all_different(Kleuren),
+    check_kleuring(Rest, KleurLijst).
+
+vind_alle_kleuren(AlleKleuren) :-
+    findall(X, knoop(_,X), AlleKleurenLijst),
+    concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+    append(SubList, Acc, NewAcc),
+    concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+/*
+checkValid([], _):- !.
+checkValid([Knoop|Rest], KleurLijst) :- !,
+    %member(kleur(Knoop, _), KleurLijst),
+    %vind_alle_buren(Knoop, AlleBuren),
+    %kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    %all_different(Kleuren),
+    checkValid(Rest, KleurLijst).
+*/
+
+/*
+vind_alle_buren(Knoop, AlleBuren) :-
+    findall(X, boog(X, Knoop), Buren1),
+    findall(Y, boog(Knoop, Y), Buren2),
+    append(Buren1, Buren2, AlleBurenUnsorted), %
+    sort(AlleBurenUnsorted, AlleBuren). % Om er zo dubbele waarden uit te halen
+
+kleuren_bij_knopen(Knopen, KleurLijst, Kleuren) :-
+    findall(X, (member(Knoop, Knopen), !, member(kleur(Knoop, X), KleurLijst)), Kleuren).
+
+initKleuren([]).
+initKleuren([kleur(Knoop, Kleur)|Knopen]) :-
+    knoop(Knoop, Kleuren),
+    member(Kleur, Kleuren), % Controleren of de kleur behoort tot de kleurlijst van de knoop
+    initKleuren(Knopen).
+*/
+
+/*
+:- use_module(library(clpfd)).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    findall((X,Y), boog(X,Y), AlleBogen),
+
+    vind_alle_kleuren(AlleKleuren),
+    vind_kleuring(AlleKnopen, AlleKleuren, KleurLijst).
+
+vind_kleuring(AlleKnopen, AlleKleuren, KleurLijst) :-
+    Vars = AlleKnopen,
+    Vars in AlleKleuren,
+    all_different(Vars),
+    checkValid(Vars, AlleKleuren),
+    KleurLijst = Vars.
+
+    vind_alle_kleuren(AlleKleuren) :-
+        findall(X, knoop(_,X), AlleKleurenLijst),
+        concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+    concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+    concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+        append(SubList, Acc, NewAcc),
+        concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+checkValid([], _) :- !.
+checkValid([Var|Rest], Kleuren) :-
+    select(Var, Kleuren, NieuweKleuren),
+    checkValid(Rest, NieuweKleuren).
+
+%   maplist(getKleur, AlleKnopen, KleurPerKnoop)
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+:- use_module(library(clpfd)).
+
+knoop(a,[1,3,5]).
+knoop(b,[2,4,6]).
+knoop(c,[1,2]).
+knoop(d,[1,3]).
+
+boog(a, b).
+boog(a, c).
+boog(b, c).
+boog(c, d).
+boog(d, a).
+
+vind_kleuring(KleurLijst) :-
+    findall(X, knoop(X,_), AlleKnopen),
+    vind_alle_kleuren(AlleKleuren),
+    findall(kleur(X, _), member(X, AlleKnopen), KleurLijst), % Initialiseer kleurlijst met alle knopen
+    burenConstraint(AlleKnopen, KleurLijst).
+
+burenConstraint([], _).
+burenConstraint([Knoop|Rest], KleurLijst) :-
+    vind_alle_buren(Knoop, AlleBuren),
+    member(kleur(Knoop, Kleur), KleurLijst),
+    knoop(Knoop, AanvKleuren),
+    member(Kleur, AanvKleuren),
+    kleuren_bij_knopen([Knoop|AlleBuren], KleurLijst, Kleuren),
+    all_different(Kleuren),
+    burenConstraint(Rest, KleurLijst).
+
+vind_alle_kleuren(AlleKleuren) :-
+    findall(X, knoop(_,X), AlleKleurenLijst),
+    concatenateSubLists(AlleKleurenLijst, [], AlleKleuren).
+
+concatenateSubLists([], Lijst, AlleKleuren) :- sort(Lijst, AlleKleuren), !.
+concatenateSubLists([SubList|Rest], Acc, AlleKleuren) :-
+    append(SubList, Acc, NewAcc),
+    concatenateSubLists(Rest, NewAcc, AlleKleuren).
+
+vind_alle_buren(Knoop, AlleBuren) :-
+    findall(X, boog(X, Knoop), Buren1),
+    findall(Y, boog(Knoop, Y), Buren2),
+    append(Buren1, Buren2, AlleBurenUnsorted), %
+    sort(AlleBurenUnsorted, AlleBuren). % Om er zo dubbele waarden uit te halen
+
+kleuren_bij_knopen(Knopen, KleurLijst, Kleuren) :-
+    findall(X, (member(Knoop, Knopen), member(kleur(Knoop, X), KleurLijst)), Kleuren).
+

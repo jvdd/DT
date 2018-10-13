@@ -1,0 +1,145 @@
+----------------- Data types -----------------
+
+-- Onderstel een orde op de knopen
+data Boog a = Boog { start :: a,
+                     einde :: a,
+                     capaciteit :: Int
+                   } deriving (Show)
+
+data GerichteGraaf a = GerichteGraaf { bron :: a,
+                                       put :: a,
+                                       bogen :: [Boog a]
+                                     } deriving (Show)
+
+data Label a = L a a Int deriving (Show)-- Ook eens andere manier zonder record syntax proberen
+
+{-data LabelsBehandeld a = LabelsBehandeld { labels :: [Label a],
+                                           behandeld :: [a]
+                                         } deriving (Show)
+-}
+
+data Stroom a = F a a Int deriving (Show) -- Ook eens andere manier zonder record syntax proberen
+
+
+----------------- Voorbeelden -----------------
+
+-- Figuur 1.69 cursus FVI
+gerGraaf1 = GerichteGraaf 'a' 'z' [Boog 'a' 'b' 7, Boog 'a' 'd' 2, Boog 'b' 'd' 3,
+                                   Boog 'c' 'b' 4, Boog 'c' 'z' 4, Boog 'd' 'c' 4]
+
+
+----------------- Algoritme -----------------
+
+-- Algoritme: Constructie van een maximale stroming.
+{-
+maxStroming ::(Ord a) => GerichteGraaf a -> [Stroom a]
+maxStroming gerGraaf = execAlgo gerGraaf (initialisatie gerGraaf) (labelDeBron gerGraaf) [] -- Behandelde knopen = []
+-}
+execAlgo :: (Ord a, Show a) => GerichteGraaf a -> [Stroom a] -> [Label a] -> [a] -> IO() -- -> [Stroom a]
+execAlgo gerGraaf stroom labels behandeld = do
+        putStrLn ("Stroom: " ++ (show stroom))
+        putStrLn ("Labels: " ++ (show labels))
+        putStrLn ("Behandeld: " ++ (show behandeld))
+        if (aangekomen (put gerGraaf) labels) then putStrLn "Aangekomen"
+        else putStrLn "Nog niet aangekomen"
+        putStrLn ""
+        if (aangekomen (put gerGraaf) labels) then execAlgo gerGraaf (verbeterStroming gerGraaf stroom labels) (labelDeBron gerGraaf) [] -- Als aangekomen dan verbeter stroming en ga naar 2.
+        --else if length labels == length behandeld then stroom       --TODO niet zeker: L\B = Leeg
+        else execAlgo gerGraaf stroom ((labelBuren (kiesVolgendeKnoop labels behandeld) gerGraaf labels stroom) ++ labels) ((kiesVolgendeKnoop labels behandeld) : behandeld)
+
+-- 1. Initialisatie
+initialisatie :: GerichteGraaf a -> [Stroom a]
+initialisatie gerGraaf = definieerF gerGraaf
+    where definieerF gerGraaf = [F (start boog) (einde boog) 0 | boog <- (bogen gerGraaf)]
+
+-- 2. Label de bron
+labelDeBron :: GerichteGraaf a -> [Label a]
+labelDeBron gerGraaf =  [L (bron gerGraaf) (bron gerGraaf) (maxBound)] -- (1/0) in plaats van inf
+
+-- 3. Aangekomen?
+aangekomen :: (Eq a) => a -> [Label a] -> Bool
+aangekomen _ [] = False
+aangekomen knoop ((L labelKnoop _ _) : rest) = if knoop == labelKnoop then True
+                                                else aangekomen knoop rest
+
+verbeterStroming :: (Eq a) => GerichteGraaf a -> [Stroom a] -> [Label a] -> [Stroom a]
+verbeterStroming gerGraaf stroom labels = updateStroming (put gerGraaf) stroom labels (getDelta (put gerGraaf) labels)
+    where updateStroming knoop stroom labels delta = if (voorganger knoop labels) == knoop then stroom
+                                                     else updateStroming (voorganger knoop labels) (updateStroom (voorganger knoop labels) knoop stroom delta) labels delta
+          updateStroom knoop1 knoop2 ((F x y stroom) : rest) delta = if (x == knoop1) && (y == knoop2) then ((F x y (stroom + delta)) : rest)        -- Goede knoop
+                                                                     else if (y == knoop1) && (x == knoop2) then ((F x y (stroom - delta)) : rest)   -- Slechte knoop
+                                                                     else (F x y stroom) : (updateStroom knoop1 knoop2 rest delta)
+
+getDelta :: (Eq a) => a -> [Label a] -> Int
+getDelta knoop ((L x _ delta) : rest) = if x == knoop then delta
+                                        else getDelta knoop rest
+
+voorganger knoop ((L x y _) : rest) = if x == knoop then y
+                                      else voorganger knoop rest
+
+-- 4. Kies volgende knoop
+kiesVolgendeKnoop :: (Ord a) => [Label a] -> [a] -> a
+kiesVolgendeKnoop labels behandeld = kies (qs (alleGelabeldeKnopen labels)) behandeld
+    where alleGelabeldeKnopen [] = []
+          alleGelabeldeKnopen ((L x _ _) : rest) = x : (alleGelabeldeKnopen rest)
+          qs [] = [] -- qs gebruiken om label met kleinste index i te selecteren
+          qs (pivot:xs) = (qs [x | x <- xs, x > pivot]) ++ (pivot : qs [y | y <-xs, y < pivot])
+          kies (knoop : rest) behandeld = if not (bevat knoop behandeld) then knoop
+                                          else kies rest behandeld
+          bevat _ [] = False
+          bevat x (y : rest) = if x == y then True
+                               else bevat x rest
+
+-- 5. Label buren
+labelBuren :: (Eq a) => a -> GerichteGraaf a -> [Label a] -> [Stroom a] -> [Label a]
+labelBuren knoop gerGraaf labels stroom = geefBurenLabel knoop (burenZonderLabel (vindAlleBuren knoop gerGraaf) labels) (getDelta knoop labels) stroom gerGraaf
+    {-where vindAlleBuren knoop gerGraaf = [if ((start boog) == knoop) then (einde boog) else (start boog)| boog <- (bogen gerGraaf), (start boog) == knoop || (einde boog) == knoop]
+          burenZonderLabel [] _ = []
+          burenZonderLabel (knoop : rest) labels = if (aangekomen knoop labels) then knoop : (burenZonderLabel rest labels)
+                                                   else burenZonderLabel rest labels
+          geefBurenLabel _ [] _ _ _ = []
+          geefBurenLabel knoop (buur : rest) delta stroom gerGraaf= (geefLabel knoop buur delta stroom gerGraaf) ++ (geefBurenLabel knoop rest delta stroom gerGraaf)
+          geefLabel knoop buur delta ((F x y val) : rest) gerGraaf = if x == knoop && y == buur then -- goede boog
+                                                                            if (getCapaciteit gerGraaf x y) > val then [L y x (min delta val)]
+                                                                            else []
+                                                                     else if y == knoop && x == buur then
+                                                                            if val > 0 then [L y x (min delta ((getCapaciteit gerGraaf y x) - val))]
+                                                                            else []
+                                                                     else geefLabel knoop buur delta rest gerGraaf-}
+
+vindAlleBuren knoop gerGraaf = [if ((start boog) == knoop) then (einde boog) else (start boog)| boog <- (bogen gerGraaf), (start boog) == knoop || (einde boog) == knoop]
+burenZonderLabel [] _ = []
+burenZonderLabel (knoop : rest) labels = if not (aangekomen knoop labels) then knoop : (burenZonderLabel rest labels)
+                                         else burenZonderLabel rest labels
+geefBurenLabel _ [] _ _ _ = []
+geefBurenLabel knoop (buur : rest) delta stroom gerGraaf= (geefLabel knoop buur delta stroom gerGraaf) ++ (geefBurenLabel knoop rest delta stroom gerGraaf)
+geefLabel _ _ _ [] _ = []
+geefLabel knoop buur delta ((F x y val) : rest) gerGraaf = if x == knoop && y == buur then -- goede boog
+                                                                     if (getCapaciteit gerGraaf x y) > val then [L y x (min delta ((getCapaciteit gerGraaf x y) - val))]
+                                                                     else []
+                                                           else if y == knoop && x == buur then
+                                                                     if val > 0 then [L y x (min delta val)]
+                                                                     else []
+                                                           else geefLabel knoop buur delta rest gerGraaf
+
+
+getCapaciteit :: (Eq a) => GerichteGraaf a -> a -> a -> Int
+getCapaciteit gerGraaf x y = capaciteitBoog (bogen gerGraaf) x y
+    where capaciteitBoog [] _ _ = minBound -- Komt nooit voor (maar moet om error bij compileren te vermijden)
+          capaciteitBoog (boog : rest) x y = if ((start boog) == x) && ((einde boog) == y) then (capaciteit boog)
+                                             else capaciteitBoog rest x y
+
+---- DEBUG
+
+d1 = initialisatie gerGraaf1
+d2 = labelDeBron gerGraaf1
+d3 = execAlgo gerGraaf1 (initialisatie gerGraaf1) (labelDeBron gerGraaf1) []
+d4 = aangekomen (put gerGraaf1) (labelDeBron gerGraaf1)
+d5 = length (labelDeBron gerGraaf1) == length []
+d6 = (labelBuren (kiesVolgendeKnoop (labelDeBron gerGraaf1) []) gerGraaf1 (labelDeBron gerGraaf1) (initialisatie gerGraaf1)) ++ (labelDeBron gerGraaf1)
+
+
+l1 = labelBuren 'a' gerGraaf1 (labelDeBron gerGraaf1) (initialisatie gerGraaf1)
+l2 = vindAlleBuren 'a' gerGraaf1
+l3 = burenZonderLabel (vindAlleBuren 'a' gerGraaf1) (labelDeBron gerGraaf1)
+l4 = geefBurenLabel 'a' (burenZonderLabel (vindAlleBuren 'a' gerGraaf1) (labelDeBron gerGraaf1)) (getDelta 'a' (labelDeBron gerGraaf1)) (initialisatie gerGraaf1) gerGraaf1

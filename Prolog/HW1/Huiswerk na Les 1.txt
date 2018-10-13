@@ -1,0 +1,98 @@
+Te maken en in te sturen tegen maandag 20 februari, 23u.
+
+
+Schrijf 4 predicaten die werken op bomen - de representatie van bomen
+volgt daarbij die gezien in de les van 16 februari.
+
+
+1) isin_boom/2
+        arg1: boom, input
+        arg2: waarde, input
+
+?- isin_boom(node(
+                  node(leeg,leeg,7),
+                  node(leeg,leeg,8),
+                  7
+                 ),
+             7).
+true.
+
+?- isin_boom(node(
+                  node(leeg,leeg,7),
+                  node(leeg,leeg,8),
+                  7
+                 ),
+             12).
+fail.
+
+?- isin_boom(node(
+                  node(leeg,leeg,7),
+                  node(leeg,leeg,8),
+                  7
+                 ),
+             X).
+
+???
+
+
+
+
+
+2) isin_boom/3
+	arg1: boom, input
+	arg2: waarde, input
+	arg3: aantal keer dat die waarde voorkomt in de boom: output
+
+	voorbeeldoproep:
+?- isin_boom(node(
+                  node(leeg,leeg,7),
+                  node(leeg,leeg,8),
+                  7
+                 ),
+             7,
+             Aantal).
+
+Aantal = 2
+
+Probeer ook:
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), 8, Aantal).
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), 12, Aantal).
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), X, Aantal).
+
+?- isin_boom(node(node(leeg,leeg,7),node(leeg,leeg,8),7), X, 1).
+
+
+en leg het antwoord uit.
+
+
+3) Verwijder een node met gegeven waarde uit een gegeven boom.
+
+verwijder_node/3
+	arg1: boom input
+	arg2: waarde input
+	arg3: boom output
+
+?- verwijder_node(node(node(leeg,leeg,7),node(leeg,leeg,8),7), 7, Boom).
+Boom = node(leeg, leeg, 8) ;
+false.
+
+?- verwijder_node(node(node(leeg,leeg,7),node(leeg,leeg,8),7), 8, Boom).
+Boom = node(node(leeg, leeg, 7), leeg, 7) .
+
+De output mag anders zijn, maar in de "output" moeten dezelfde nodes
+komen als in de input, en in dezelfde volgorde, behalve de nodes met
+de te verwijderen waarde.
+
+
+
+4) genereer een boom met de getallen van 1 tot n erin - n is gegeven:
+
+?- gen_boom(3,Boom).
+Boom = node(leeg,node(leeg,node(leeg,leeg,1),2),3)
+
+is ok, maar de volgorde en vorm van de boom mag anders
+
+Kan je een gebalanceerde boom met n getallen erin maken ?

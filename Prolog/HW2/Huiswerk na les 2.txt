@@ -1,0 +1,45 @@
+Te maken en in te sturen tegen dinsdag 28 februari, 23u.
+
+
+Schrijf ? predicaten die werken op bomen en/of lijsten - de representatie van bomen
+volgt daarbij die gezien in de les van 16 februari.
+
+
+Zoals voordien: experimenteer met oproepen van je predicaten die niet
+voorzien waren en probeer de resultaten te verklaren.
+
+
+
+1) maak_boom/2
+
+   arg1: gesloten lijst met getallen; input
+   arg2: gebalanceerde boom die alle getallen uit arg1 bevat in prefix orde
+
+
+voorbeeld:
+
+?- maak_boom([1,2,3,4,5],B).
+
+B = boom(boom(leeg,boom(leeg,leeg,3),2),boom(leeg,boom(leeg,leeg,5),4),1)
+
+
+
+
+2) verzamel_waarden/2
+
+   arg1: gegeven boom
+   arg2: output: lijst van waarden in de boom, in de infix orde
+
+verzamel_waarden(boom(boom(leeg,boom(leeg,leeg,3),2),boom(leeg,boom(leeg,leeg,5),4),1),Waarden).
+T
+
+?- verzamel_waarden(boom(boom(leeg,boom(leeg,leeg,3),2),boom(leeg,boom(leeg,leeg,5),4),1),Waarden).
+
+Waarden = [2,3,1,4,5]
+
+verzamel_waarden(node(node(leeg,node(leeg,leeg,3),2),node(leeg,node(leeg,leeg,5),4),1),Waarden)
+
+
+
+3) Schrijf een merge_sort/2
+

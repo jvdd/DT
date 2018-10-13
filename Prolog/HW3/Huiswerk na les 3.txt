@@ -1,0 +1,35 @@
+Schrijf een programma om de minimaal opspannende bomen van een gegeven
+graaf te vinden.
+
+De graaf is gegeven als een rij feiten, bv.
+
+   knoop(a).
+   knoop(b).
+   knoop(c).
+
+   boog(a,b,3).
+   boog(b,c,2).
+   boog(a,c,1).
+
+De MOBs worden geconstrueerd als een lijst van bogen en hun totaal gewicht
+
+Twee predicaten worden verwacht:
+
+1) prim/2 of kruskal/2
+die implementeren het respectievelijke algoritme, bijvoorbeeld
+
+    ?- prim(Bogen,TotaalGewicht).
+    Bogen = [boog(a,c), boog(b,c)]
+    TotaalGewicht = 3
+
+
+2) naief/2
+implementeert een "generate&test" algoritme mbv predicaten als subset,
+member, findall enzovoort
+
+
+==========
+
+voor beide versie geldt: als er meerdere MOBs bestaan voor de gegeven
+graaf, dan moeten ze allemaal gegeven worden door backtracking;
+volgorde niet belangrijk

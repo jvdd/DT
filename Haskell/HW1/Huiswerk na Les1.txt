@@ -1,0 +1,68 @@
+Hier is code om de som van de (Int) elementen van een lijst te maken:
+
+suml :: [Int] -> Int
+
+suml [] = 0
+suml (x:xs) = x + (suml xs)
+
+
+en voor het product van de elementen van een lijst wordt dat:
+
+prodl [] = 1
+prodl (x:xs) = x * (prodl xs)
+
+
+Ipv voor elke operatie een nieuwe functie te maken, kunnen we 1 nieuwe
+functie definieren
+
+vouw :: [Int] -> Int -> (Int -> Int -> Int) -> Int
+
+zodat 
+	suml lijst = vouw lijst 0 (+) 
+en
+	prodl lijst = vouw lijst 1 (*)
+
+Schrijf vouw.
+
+Dus:
+
+*Main> vouw [1,2,3,4] 0 (+)
+10
+*Main> vouw [1,2,3,4] 1 (*)
+24
+
+--------------------------------------------------
+
+De driehoek van Pascal stelt de binomiaalcoefficienten voor. Het is
+mogelijk om deze driehoek rij per rij op te bouwen aan de hand
+van de volgende twee observaties:
+
+Elke rij begint en eindigt met een 1.  De overige getallen in de rij
+kunnen bekomen worden door telkens twee opeenvolgende elementen uit
+de vorige rij op te tellen.
+
+De figuur op
+http://en.wikipedia.org/wiki/File:PascalTriangleAnimated2.gif
+illustreert dit principe.
+
+Opgave: Schrijf de functie pascal :: Int -> [[Int]] die de driehoek van
+Pascal berekent volgens de bovenstaande methode. Deze functie heeft
+als resultaat een lijst waarvan ieder element een rij in de driehoek
+voorstelt.
+
+Hint: Het kan handig zijn om een hulpfunctie
+
+      volgende :: [Int] -> [Int]
+
+te schrijven die een (deel van een) rij in de driehoek genereert op
+basis van de gegeven vorige rij.
+
+*Main> pascal 10
+[[1,10,45,120,210,252,210,120,45,10,1],[1,9,36,84,126,126,84,36,9,1],
+[1,8,28,56,70,56,28,8,1],[1,7,21,35,35,21,7,1],[1,6,15,20,15,6,1],
+[1,5,10,10,5,1],[1,4,6,4,1],[1,3,3,1],[1,2,1],[1,1],[1]]
+
+(De line-breaks zijn van mij, niet van ghci)
+
+
+Het is ok als de lijst in omgekeerde volgorde wordt gegenereerd.

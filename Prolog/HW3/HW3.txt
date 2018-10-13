@@ -1,0 +1,101 @@
+% PRIM
+% TODO: ZORGEN DAT UNIEKE BOMEN WORDEN TERUG GEGEVEN
+
+prim(Bogen,TotaalGewicht) :-
+    knoop(StartKnoop),
+    Behandeld = [StartKnoop],
+    telKnopen(AantalKnopen),
+    prim(Bogen,TotaalGewicht,Behandeld,AantalKnopen).
+
+prim([],0,Behandeld,AantalKnopen) :-
+    length(Behandeld, AantalBehandeld),
+    AantalKnopen =:= AantalBehandeld.
+prim(Bogen,TotaalGewicht,Behandeld,AantalKnopen) :-
+    vindAlleBuren(Behandeld,Buren),
+    sort(Buren,[(Gewicht,X,Y)|_]),
+    (member(X,Behandeld) ->
+        NewMinKnoop = Y
+    ;
+        NewMinKnoop = X
+    ),
+    UpdatedBehandeld = [NewMinKnoop|Behandeld],
+    (boog(X,Y,_) ->
+        Boog = boog(X,Y)
+    ;
+        Boog = boog(Y,X)
+    ),
+    Bogen = [Boog|RestBogen],
+    prim(RestBogen,RestGewicht,UpdatedBehandeld,AantalKnopen),
+    TotaalGewicht is Gewicht + RestGewicht.
+
+vindAlleBuren(Behandeld,Buren):-
+    findall((W,X,Y),((boog(Y,X,W);boog(X,Y,W)),member(X,Behandeld),\+member(Y,Behandeld)),Buren).
+
+telKnopen(Aantal) :-
+    findall(W, knoop(W), Lijst),
+    length(Lijst, Aantal).
+
+
+
+
+
+% NAIEF
+naief(Bogen,TotaalGewicht):-
+    knoop(StartKnoop),
+    Toegevoegd = [StartKnoop],
+    telKnopen(AantalKnopen),
+    genereerOB(Bogen,StartKnoop,Toegevoegd,AantalKnopen),
+    testMOB(Bogen),
+    totGewicht(Bogen,TotaalGewicht).
+
+genereerOB([],_,Toegevoegd,AantalKnopen) :-
+    length(Toegevoegd, AantalToegevoegd),
+    AantalKnopen =:= AantalToegevoegd.
+genereerOB(Bogen,Knoop,Toegevoegd,AantalKnopen) :-
+    knoop(X),
+    \+member(X,Toegevoegd),
+    (
+    (boog(Knoop,X,_),
+    Bogen = [boog(Knoop,X)|RestBogen])
+    ;
+    (boog(X,Knoop,_),
+    Bogen = [boog(X,Knoop)|RestBogen])
+    ),
+    UpdatedToegevoegd = [X|Toegevoegd],
+    genereerOB(RestBogen,X,UpdatedToegevoegd,AantalKnopen).
+
+% Bogen bevat een OB (kringvrij en n-1 bogen)
+testMOB(Bogen) :-
+    bogenNietInOB(Bogen,AndereBogen),
+    testMOB(Bogen,AndereBogen).
+
+bogenNietInOB(Bogen,AndereBogen) :-
+    findall(boog(X,Y),(boog(X,Y,_),\+member(boog(X,Y),Bogen)),AndereBogen).
+
+testMOB(_,[]).
+testMOB(Bogen,[boog(X,Y)|RestAndereBogen]) :-
+    gewicht(X,Y,Gewicht),
+    Behandeld = [X],
+    geldigeAfstand(Bogen,X,Y,Behandeld,Gewicht),
+    testMOB(Bogen,RestAndereBogen).
+
+gewicht(X,Y,Gewicht) :-
+    boog(X,Y,Gewicht).
+
+geldigeAfstand(_,X,X,_,_).
+geldigeAfstand(Bogen,X,Y,Behandeld,Gewicht) :-
+    (member(boog(X,Z),Bogen),\+member(Z,Behandeld) ->
+        boog(X,Z,Afstand)
+    ;
+    member(boog(Z,X),Bogen),\+member(Z,Behandeld) ->
+        boog(Z,X,Afstand)
+    ),
+    Gewicht >= Afstand,
+    UpdatedBehandeld = [Z|Behandeld],
+    geldigeAfstand(Bogen,Z,Y,UpdatedBehandeld,Gewicht).
+
+totGewicht([],0).
+totGewicht([boog(X,Y)|Rest],TotaalGewicht) :-
+    boog(X,Y,Gewicht),
+    totGewicht(Rest,RestGewicht),
+    TotaalGewicht is Gewicht + RestGewicht.

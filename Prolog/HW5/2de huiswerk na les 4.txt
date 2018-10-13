@@ -1,0 +1,44 @@
+De bedoeling is dat je eens de clpfd library van SWI gebruikt.
+Kijk op http://www.swi-prolog.org/pldoc/man?section=clpfd voor meer
+info, maar je hebt niet heel veel nodig. Het probleem dat je moet
+programmeren is dat van "list coloring" - zie bijvoorbeeld
+https://en.wikipedia.org/wiki/List_coloring, maar hieronder een korte
+uitleg:
+
+bij gewone grafekleuring zijn er N kleuren en elke knoop mag elk van
+de N kleuren gebruiken. Bij list coloring is van tevoren bepaald welke
+[lijst van] kleuren elke knoop mag gebruiken en die lijst hoeft niet
+dezelfde te zijn voor elke knoop. Gewone grafekleuring met N kleuren
+is dus een speciaal geval van list coloring, en elke knoop heeft
+dezelfde lijst (namelijk 1,,N) van mogelijke kleuren.
+
+De "invoer" voor je programma is een reeks feiten die de graaf
+beschrijven met de lijst van kleuren voor elke knoop:
+
+knoop(a,[1,3,5]).
+knoop(b,[2,4,6]).
+
+boog(a,b).
+
+is een heel klein voorbeeldje. We gebruiken steeds getallen voor de
+kleuren.
+
+Schrijf een programma dat gebruik maakt van 
+
+	:- use_module(library(clpfd)).
+
+en een aantal clpfd primitieven om
+
+1) een kleuring te vinden die voldoet aan de beperkingen (geen twee
+aangrenzende knopen dezelfde kleur en voor een knoop enkel kleuren uit
+zijn eigen list))
+
+2) een "minimale" kleuring, ttz een kleuring waarvan de kleur met
+maximaal nummer minimaal is
+
+
+Kijk in de SWI clpfd manual bij
+
+     all_different (of all_distinct)
+     labeling en sectie A.8.11 Optimisation
+     	      	 	voor deel 2)

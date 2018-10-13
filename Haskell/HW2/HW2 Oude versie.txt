@@ -1,0 +1,61 @@
+
+----------------------------- OPDRACHT 1 -----------------------------
+
+isVanGraaf :: [Int] -> Bool
+isVanGraaf [] = True
+isVanGraaf (x : rest) = if allNuls (x : rest) then True     -- Is dan grafisch want kan voorgesteld worden door geïsoleerde knopen
+                        else if someNeg (x : rest) then False
+                        else isVanGraaf (qs (sAccent x rest [])) -- Moet gesorteerd zijn voor de volgende stap
+                            where sAccent x [] acc = if x > 0 then [-1] -- zodat het dan false zal teruggeven
+                                                     else acc
+                                  sAccent 0 rest acc = acc ++ rest
+                                  sAccent n (x : xs) acc = sAccent (n - 1) xs ((x - 1) : acc)
+
+allNuls :: [Int] -> Bool
+allNuls [] = True
+allNuls (x : rest) = if x == 0 then allNuls rest
+                     else False
+
+someNeg :: [Int] -> Bool
+someNeg [] = False
+someNeg (x : rest) = if x < 0 then True
+                     else someNeg rest
+
+qs [] = []
+qs (pivot:xs) = (qs [x | x <- xs, x > pivot]) ++ (pivot : qs [y | y <-xs, y <= pivot])
+
+
+----------------------------- OPDRACHT 2 -----------------------------
+
+
+koninginnen :: Int -> [[(Int,Int)]]
+koninginnen n = [ y | x <- perm [1..n], diagConstr [1..n] x, y <- [zip [1..n] x]]
+    where diagConstr [] [] = True
+          diagConstr (x1 : rest1) (x2 : rest2) = if not (someNuls (difL (dif x1 rest1) (dif x2 rest2))) then diagConstr rest1 rest2
+                                                 else False
+          dif x lijst = dif3 x lijst [] -- accumulator voor efficiëntie
+          dif3 _ [] acc = acc           -- lijst is dan wel omgekeerd, maar dat maakt niet uit
+          dif3 x (el : rest) acc = dif3 x rest (abs(x - el) : acc)
+          difL lijst1 lijst2 = difL3 lijst1 lijst2 [] -- idem opmerking als bij dif3
+          difL3 [] [] acc = acc
+          difL3 (el1 : rest1) (el2 : rest2) acc = difL3 rest1 rest2 ((el1 - el2) : acc)
+
+
+perm :: [Int] -> [[Int]]
+perm [] = [[]]
+-- perm l =[[y | x <- l, y <- map(x:) perm (delete x l)]]
+-- perm l = [[y | x <- l, pL <- perm (delete x l), y <- x : pL]]
+perm l = [ y | x <- l, y <- map (x:) (perm (delete x l))]
+    --where permute [] = []
+          -- permute l = [y | x <- l, y <- x: permute (delete x l)]
+          --permute (x : rest) = map (x:) (permute rest)
+
+delete :: Int -> [Int] -> [Int]
+delete _ [] = []
+delete x (el : rest) = if x == el then rest
+                       else el : (delete x rest)
+
+someNuls :: [Int] -> Bool
+someNuls [] = False
+someNuls (x : rest) = if x /= 0 then someNuls rest
+                      else True
